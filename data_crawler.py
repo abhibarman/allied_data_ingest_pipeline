@@ -3,6 +3,7 @@ import requests
 from langchain.document_loaders import UnstructuredURLLoader
 import pandas as pd
 from clearml import PipelineController
+import unstructured
 
 
 def get_pages(url = "https://awac.com/"):   
@@ -31,7 +32,11 @@ def get_pages(url = "https://awac.com/"):
 
 def load_from_urls(urls):
 
+    import unstructured
     from langchain.document_loaders import UnstructuredURLLoader
+    from clearml import Dataset
+    import pandas as pd
+    import uuid
 
     data_list = []
     loader = UnstructuredURLLoader(urls=urls)
@@ -45,11 +50,16 @@ def load_from_urls(urls):
         }
         data_list.append(data_dict)
     dataframe = pd.DataFrame(data_list)
+    file_name = "AWAC"+ str(uuid.uuid4()) + ".csv"
+    dataframe.to_csv(file_name)
+    print(f"file_name: {file_name}")
 
+    dataset = Dataset.create(dataset_name="AWAC_Web", 
+                               dataset_project="AWAC")
+    dataset.add_files(file_name)
+    dataset.finalize(auto_upload=True)
     return dataframe
 
-""" df = load_from_urls()
-print(df.head()) """
 
 
 if __name__ == '__main__':
@@ -87,12 +97,6 @@ if __name__ == '__main__':
         cache_executed_step=True,
     )
 
-
-    # For debugging purposes run on the pipeline on current machine
-    # Use run_pipeline_steps_locally=True to further execute the pipeline component Tasks as subprocesses.
-    # pipe.start_locally(run_pipeline_steps_locally=False)
-
-    # Start the pipeline on the services queue (remote machine, default on the clearml-server)
     pipe.start()
 
     print('pipeline completed')
