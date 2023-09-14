@@ -4,8 +4,12 @@ from langchain.document_loaders import UnstructuredURLLoader
 import pandas as pd
 from clearml import PipelineController
 
-def get_pages(url = "https://awac.com/"):
+
+def get_pages(url = "https://awac.com/"):   
+
     import requests
+    from bs4 import BeautifulSoup
+
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     links = [a.get('href') for a in soup.find_all('a')]
@@ -25,9 +29,9 @@ def get_pages(url = "https://awac.com/"):
 
     return links_formatted
 
-def load_from_urls(url = "https://awac.com/"):
+def load_from_urls(urls):
 
-    urls = get_pages(url)
+    from langchain.document_loaders import UnstructuredURLLoader
 
     data_list = []
     loader = UnstructuredURLLoader(urls=urls)
@@ -44,8 +48,8 @@ def load_from_urls(url = "https://awac.com/"):
 
     return dataframe
 
-#df = load_from_urls()
-#print(df.head())
+""" df = load_from_urls()
+print(df.head()) """
 
 
 if __name__ == '__main__':
@@ -76,9 +80,9 @@ if __name__ == '__main__':
     )
     pipe.add_function_step(
         name='load_from_urls',
-        #parents=['get_pages'],  # the pipeline will automatically detect the dependencies based on the kwargs inputs
+        parents=['get_pages'],  # the pipeline will automatically detect the dependencies based on the kwargs inputs
         function=load_from_urls,
-        function_kwargs=dict(data_frame='${get_pages.links_formatted}'),
+        function_kwargs=dict(urls='${get_pages.links_formatted}'),
         function_return=['dataframe'],
         cache_executed_step=True,
     )
