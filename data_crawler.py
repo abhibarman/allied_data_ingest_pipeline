@@ -5,7 +5,7 @@ import pandas as pd
 from clearml import PipelineController
 
 def get_pages(url = "https://awac.com/"):
-
+    import requests
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'html.parser')
     links = [a.get('href') for a in soup.find_all('a')]
