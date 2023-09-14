@@ -1,5 +1,7 @@
 clearml
+bs4
 beautifulsoup4
 langchain
 pandas
 requests
+unstructured
